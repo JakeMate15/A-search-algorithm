@@ -70,8 +70,34 @@ public class Agente extends Thread{
                 
             }
             else{
-                busquedaA();
-                break;
+                String recorrido = busquedaA();
+
+                for(int c = 0; c < recorrido.length(); c++) {
+                    casillaAnterior = tablero[i][j];
+                    dir = Character.getNumericValue(recorrido.charAt(c));
+                    i += dx[dir];
+                    j += dy[dir];
+
+                    if(matrix[i][j] == 2){
+                        casillaAnterior.setIcon(null);
+                        tablero[i][j].setIcon(icon);
+                        ocupado ^= 1;
+                        swap();
+                        //pausa();
+                        casillaAnterior.setIcon(icon);
+                        tablero[i][j].setIcon(nave);
+
+                        i -= dx[dir];
+                        j -= dy[dir];
+                    }
+                    else{
+                        actualizarPosicion();
+                    }
+
+                    pausa();
+
+                }
+
                 /*
                 if(naveX == i){
                     if(naveY>j){
@@ -122,12 +148,7 @@ public class Agente extends Thread{
                  */
             }
                 
-            try{
-               sleep(100+aleatorio.nextInt(100));
-            }
-            catch (InterruptedException ex){
-                ex.printStackTrace(System.out);
-            }
+            pausa();
         }
 
                       
@@ -135,7 +156,6 @@ public class Agente extends Thread{
 
 
     private String busquedaA() {
-        System.out.println("Vamos a" + naveX + "," + naveY);
 
         PriorityQueue<Nodo> pq = new PriorityQueue<>(new NodoComparator());
         Nodo inicio = new Nodo(i, j, 0, "", 0);
@@ -168,8 +188,8 @@ public class Agente extends Thread{
             }
         }
 
-        System.out.println(actual.getRecorrido());
-        System.out.println(iteraciones);
+        //System.out.println(actual.getRecorrido());
+        //System.out.println(iteraciones);
 
         return actual.getRecorrido();
     }
@@ -223,6 +243,15 @@ public class Agente extends Thread{
         
         return ok2(x, y);
     }
+
+    private void pausa() {
+        try{
+            sleep(100+aleatorio.nextInt(100));
+        }
+        catch (InterruptedException ex){
+            ex.printStackTrace(System.out);
+        }
+    }
     
     //Intercambia los iconos si esta ocupado o desocupado
     private void swap(){
@@ -234,7 +263,7 @@ public class Agente extends Thread{
     public synchronized void actualizarPosicion(){
         casillaAnterior.setIcon(null); // Elimina su figura de la casilla anterior
         tablero[i][j].setIcon(icon); // Pone su figura en la nueva casilla
-        System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
+        //System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
     }
     
     public synchronized void actualizarPosicionConNave(){
