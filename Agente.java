@@ -157,13 +157,13 @@ public class Agente extends Thread{
                     int x = actual.getX() + dx[i];
                     int y = actual.getY() + dy[i];
                     int dis = actual.getDist() + 1;
-                    String recorrido = actual.getRecorrido() + dir.charAt(i);
+                    String recorrido = actual.getRecorrido() + Integer.toString(i);
                     int prio = dis + Math.abs(naveX - x) + Math.abs(naveY - y);
 
-                    //if(anterior.getY() != x || anterior.getY() != y) {
+                    if(anterior.getY() != x || anterior.getY() != y) {
                         Nodo aux = new Nodo(x, y, dis, recorrido, prio);
                         pq.add(aux);
-                    //}
+                    }
                 }
             }
         }
