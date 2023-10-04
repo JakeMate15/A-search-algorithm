@@ -19,7 +19,7 @@ import java.util.*;
 
 /**
  *
- * @author macario
+ * @author Erik
  */
 public class Escenario extends JFrame{
     private JLabel[][] tablero;     
@@ -34,7 +34,7 @@ public class Escenario extends JFrame{
     private ImageIcon robot2M;
     private ImageIcon obstacleIcon;
     private ImageIcon sampleIcon;
-    private ImageIcon actualIcon;   //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
+    private ImageIcon actualIcon;   //0: vacio, 1:robot, 2:nave, 23:muestra, 4: obstaculo
     private ImageIcon motherIcon;
     private int tipo;
     
@@ -164,7 +164,7 @@ public class Escenario extends JFrame{
         
     }
     
-    //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
+    //0: vacio, 1:robot, 2:nave, 23:muestra, 4: obstaculo
     private void gestionaObstacle(ItemEvent eventObject){
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
         if(opt.isSelected()){
@@ -182,7 +182,7 @@ public class Escenario extends JFrame{
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
         if(opt.isSelected()){
             actualIcon = sampleIcon;
-            tipo = 3;
+            tipo = 23;
         }
         else{
             actualIcon = null; 

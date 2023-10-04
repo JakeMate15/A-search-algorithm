@@ -5,7 +5,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author macario
+ * @author Erik
  */
 public class BackGroundPanel extends JPanel
 {

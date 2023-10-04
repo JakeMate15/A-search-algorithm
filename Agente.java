@@ -5,7 +5,7 @@ import javax.swing.JLabel;
 
 /**
  *
- * @author macario
+ * @author Erik
  */
 public class Agente extends Thread{
     private final String nombre;
@@ -21,6 +21,7 @@ public class Agente extends Thread{
     private int naveY;
     private int ocupado;
     private int[] dx= {1,0,-1,0}, dy= {0,1,0,-1};
+    private String dir = "drul";
     
     private JLabel casillaAnterior;
     Random aleatorio = new Random(System.currentTimeMillis());
@@ -50,24 +51,28 @@ public class Agente extends Thread{
             //System.out.println("Ocupado" + " " + ocupado);
             casillaAnterior = tablero[i][j];
             
-            
             if(ocupado == 0){
                 dir = aleatorio.nextInt(4);  
-                while(ok(i+dx[dir],j+dy[dir])==0){
+                while(!ok(i + dx[dir], j + dy[dir])){
                     dir = aleatorio.nextInt(4);
                 }
-                i+=dx[dir];
-                j+=dy[dir];
-                if(matrix[i][j] == 3){
-                    ocupado^=1;
-                    matrix[i][j] = 0;
+                i += dx[dir];
+                j += dy[dir];
+                if(matrix[i][j] > 20){
+                    ocupado ^= 1;
+                    matrix[i][j]--;
+                    if(matrix[i][j] == 20) {
+                        matrix[i][j] = 0;
+                    }
                     swap();
                 }
                 actualizarPosicion();
                 
             }
             else{
-                
+                busquedaA();
+                break;
+                /*
                 if(naveX == i){
                     if(naveY>j){
                         dir = 1;
@@ -114,6 +119,7 @@ public class Agente extends Thread{
                 else{
                     actualizarPosicion();
                 }
+                 */
             }
                 
             try{
@@ -126,12 +132,54 @@ public class Agente extends Thread{
 
                       
     }
+
+
+    private String busquedaA() {
+        System.out.println("Vamos a" + naveX + "," + naveY);
+
+        PriorityQueue<Nodo> pq = new PriorityQueue<>(new NodoComparator());
+        Nodo inicio = new Nodo(i, j, 0, "", 0);
+        pq.add(inicio);
+        Nodo actual = inicio, anterior = inicio;
+
+        int iteraciones = 0;
+        while(!pq.isEmpty()) {
+            iteraciones++;
+            anterior = actual;
+            actual = pq.poll();
+
+            if(actual.getX() == naveX && actual.getY() == naveY) {
+                break;
+            }
+
+            for(int i = 0; i < 4; i++) {
+                if(ok3(actual, i)) {
+                    int x = actual.getX() + dx[i];
+                    int y = actual.getY() + dy[i];
+                    int dis = actual.getDist() + 1;
+                    String recorrido = actual.getRecorrido() + dir.charAt(i);
+                    int prio = dis + Math.abs(naveX - x) + Math.abs(naveY - y);
+
+                    //if(anterior.getY() != x || anterior.getY() != y) {
+                        Nodo aux = new Nodo(x, y, dis, recorrido, prio);
+                        pq.add(aux);
+                    //}
+                }
+            }
+        }
+
+        System.out.println(actual.getRecorrido());
+        System.out.println(iteraciones);
+
+        return actual.getRecorrido();
+    }
     
     public int[] pos(){
         int[] res = {i,j};
         return res;
     }
     
+    //Actualiza la matriz
     public void actMat(int[][] m){
         for(int i=0; i<15; i++){
             for(int j=0; j<15; j++){
@@ -149,26 +197,34 @@ public class Agente extends Thread{
         }
     }
     
-    //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
-    private int ok(int x, int y){
+    //0: vacio, 1:robot, 2:nave, 23:muestra, 4: obstaculo
+    private boolean ok(int x, int y){
         if(x>=0 && y>=0 && x<matrix.length && y<matrix.length){
-            if(matrix[x][y]==4)  return 0;
-            if(matrix[x][y]==2)  return 0;
-            return 1;
+            if(matrix[x][y]==4)  return false;
+            if(matrix[x][y]==2)  return false;
+            return true;
         }
-        return 0;
+        return false;
     }
     
-    private int ok2(int x, int y){
+    private boolean ok2(int x, int y){
         if(x>=0 && y>=0 && x<matrix.length && y<matrix.length){
-            if(matrix[x][y]==4)  return 0;
-            if(matrix[x][y]==3)  return 0;
+            if(matrix[x][y] == 4)  return false;
+            if(matrix[x][y] > 20)  return false;
             //if(matrix[x][y]==2)  return 0;
-            return 1;
+            return true;
         }
-        return 0;
+        return false;
+    }
+
+    private boolean ok3(Nodo a, int i) {
+        int x = a.getX() + dx[i];
+        int y = a.getY() + dy[i];
+        
+        return ok2(x, y);
     }
     
+    //Intercambia los iconos si esta ocupado o desocupado
     private void swap(){
         ImageIcon aux = icon;
         icon = icon2;
@@ -178,7 +234,7 @@ public class Agente extends Thread{
     public synchronized void actualizarPosicion(){
         casillaAnterior.setIcon(null); // Elimina su figura de la casilla anterior
         tablero[i][j].setIcon(icon); // Pone su figura en la nueva casilla
-        //System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
+        System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
     }
     
     public synchronized void actualizarPosicionConNave(){
