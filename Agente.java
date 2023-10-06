@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.awt.Image;
 import java.util.*;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -24,11 +25,14 @@ public class Agente extends Thread{
     private int[] dx= {1,0,-1,0}, dy= {0,1,0,-1};
     private int[] auxDir = {2, 3, 0, 1};
     private String dir = "drul";
+    private boolean borrar;
+    private boolean rastro;
+    private ImageIcon huellas;
     
     private JLabel casillaAnterior;
     Random aleatorio = new Random(System.currentTimeMillis());
     
-    public Agente(String nombre, ImageIcon icon, ImageIcon icon2, int[][] matrix, JLabel tablero[][], Set<int[]> naves, ImageIcon nav, ImageIcon muestra){
+    public Agente(String nombre, ImageIcon icon, ImageIcon icon2, int[][] matrix, JLabel tablero[][], Set<int[]> naves, ImageIcon nav, ImageIcon muestra, ImageIcon huellas){
         this.nombre = nombre;
         this.icon = icon;
         this.matrix = matrix;
@@ -37,7 +41,11 @@ public class Agente extends Thread{
         this.icon2 = icon2;
         this.nave = nav;
         this.muestra = muestra;
+        this.huellas = huellas;
+
         ocupado = 0;
+        borrar = false;
+        rastro = true;
         
         this.i = aleatorio.nextInt(matrix.length);
         this.j = aleatorio.nextInt(matrix.length);
@@ -59,15 +67,20 @@ public class Agente extends Thread{
                 
                 //Estamos en un ratro de migas
                 if(matrix[i][j] >= 30) {
-                    System.out.println("No estoy ocupado");
-                    System.out.println(i + ","  + j);
+
+                    if(borrar) {
+                        matrix[i][j] = 0;
+                    }
+
                     dir = matrix[i][j] - 30;
                     i -= dx[dir];
                     j -= dy[dir];
 
+                    //Invertir direccion
                     if(matrix[i][j] > 20 && matrix[i][j] <= 23) {
                         dir = auxDir[dir];
                     }
+
                 }
                 else{
                     dir = aleatorio.nextInt(4);  
@@ -89,6 +102,7 @@ public class Agente extends Thread{
 
                     if(matrix[i][j] == 20) {
                         matrix[i][j] = 0;
+                        borrar = true;
                     }
 
                     casillaAnterior.setIcon(icon);
@@ -103,6 +117,9 @@ public class Agente extends Thread{
                 
             }
             else{
+                borrar = false;
+                rastro = true;
+
                 String recorrido = busquedaA();
                 dirAnterior = Character.getNumericValue(recorrido.charAt(0));
                 
@@ -264,6 +281,10 @@ public class Agente extends Thread{
     public synchronized void actualizarPosicion(){
         casillaAnterior.setIcon(null); // Elimina su figura de la casilla anterior
         tablero[i][j].setIcon(icon); // Pone su figura en la nueva casilla
+
+        if(rastro) {
+            casillaAnterior.setIcon(huellas);
+        }
         //System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
     }
     

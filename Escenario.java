@@ -33,6 +33,7 @@ public class Escenario extends JFrame{
     private ImageIcon robot2;
     private ImageIcon robot1M;
     private ImageIcon robot2M;
+    private ImageIcon huellas;
     private ImageIcon obstacleIcon;
     private ImageIcon sampleIcon;
     private ImageIcon actualIcon;   //0: vacio, 1:robot, 2:nave, 23:muestra, 4: obstaculo
@@ -91,6 +92,9 @@ public class Escenario extends JFrame{
         
         robot2M = new ImageIcon("imagenes/evaM.png");
         robot2M = new ImageIcon(robot2M.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
+
+        huellas = new ImageIcon("imagenes/huellas.png");
+        huellas = new ImageIcon(huellas.getImage().getScaledInstance(50, 50, java.awt.Image.SCALE_SMOOTH));
         
         obstacleIcon = new ImageIcon("imagenes/brick.png");
         obstacleIcon = new ImageIcon(obstacleIcon.getImage().getScaledInstance(50,50,  java.awt.Image.SCALE_SMOOTH));
@@ -121,8 +125,8 @@ public class Escenario extends JFrame{
         addWindowListener(new MyWindowAdapter());
         
         // Crea 2 agentes
-        wallE = new Agente("Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon); 
-        eva = new Agente("Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon); 
+        wallE = new Agente("Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
+        eva = new Agente("Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
         matrix[wallE.pos()[0]][wallE.pos()[1]] = 1;
         matrix[eva.pos()[0]][eva.pos()[1]] = 1;
         
