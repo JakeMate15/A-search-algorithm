@@ -45,121 +45,53 @@ public class Agente extends Thread{
 
         ocupado = 0;
         borrar = false;
-        rastro = true;
+        rastro = false;
         
         this.i = aleatorio.nextInt(matrix.length);
         this.j = aleatorio.nextInt(matrix.length);
         tablero[i][j].setIcon(icon);     
     }
+
+    public Agente(int x, int y, String nombre, ImageIcon icon, ImageIcon icon2, int[][] matrix, JLabel tablero[][], Set<int[]> naves, ImageIcon nav, ImageIcon muestra, ImageIcon huellas){
+        this.nombre = nombre;
+        this.icon = icon;
+        this.matrix = matrix;
+        this.tablero = tablero;
+        this.naves = naves;
+        this.icon2 = icon2;
+        this.nave = nav;
+        this.muestra = muestra;
+        this.huellas = huellas;
+
+        ocupado = 0;
+        borrar = false;
+        rastro = false;
+        
+        this.i = x;
+        this.j = y;
+        tablero[i][j].setIcon(icon);     
+    }
     
     @Override
     public void run(){
-        int dir = -1,  dirAnterior = -1;
         naveX = naves.iterator().next()[0];
         naveY = naves.iterator().next()[1];
 
         while(true){
-            //System.out.println("Ocupado" + " " + ocupado);
             casillaAnterior = tablero[i][j];
             
             if(ocupado == 0){
-                
-                
-                //Estamos en un ratro de migas
                 if(matrix[i][j] >= 30) {
-
-                    if(borrar) {
-                        matrix[i][j] = 0;
-                    }
-
-                    dir = matrix[i][j] - 30;
-                    i -= dx[dir];
-                    j -= dy[dir];
-
-                    //Invertir direccion
-                    if(matrix[i][j] > 20 && matrix[i][j] <= 23) {
-                        dir = auxDir[dir];
-                    }
-
+                    seguirMigas();
                 }
                 else{
-                    dir = aleatorio.nextInt(4);  
-                    while(!ok(i + dx[dir], j + dy[dir])){
-                        dir = aleatorio.nextInt(4);
-                    }
-
-                    i += dx[dir];
-                    j += dy[dir];
-                }
-
-                
-                if(matrix[i][j] > 20 && matrix[i][j] <= 23){
-                    casillaAnterior.setIcon(null);
-                    tablero[i][j].setIcon(icon);
-                    
-                    ocupado ^= 1;
-                    matrix[i][j]--;
-
-                    if(matrix[i][j] == 20) {
-                        matrix[i][j] = 0;
-                        borrar = true;
-                    }
-
-                    casillaAnterior.setIcon(icon);
-                    tablero[i][j].setIcon(muestra);
-
-                    i -= dx[dir];
-                    j -= dy[dir];
-                    swap();
+                    movAleatorio();
                 }
 
                 actualizarPosicion();
-                
             }
             else{
-                borrar = false;
-                rastro = true;
-
-                String recorrido = busquedaA();
-                dirAnterior = Character.getNumericValue(recorrido.charAt(0));
-                
-                for(int c = 0; c < recorrido.length(); c++) {
-                    casillaAnterior = tablero[i][j];
-                    dir = Character.getNumericValue(recorrido.charAt(c));
-
-                    if(matrix[i + dx[dir]][j + dy[dir]] != 2) {
-                        matrix[i][j] = (dirAnterior + 30);
-                    }
-                    i += dx[dir];
-                    j += dy[dir];
-
-                    if(matrix[i][j] == 2){
-                        casillaAnterior.setIcon(null);
-                        tablero[i][j].setIcon(icon);
-                        ocupado ^= 1;
-                        swap();
-                        casillaAnterior.setIcon(icon);
-                        tablero[i][j].setIcon(nave);
-
-                        i -= dx[dir];
-                        j -= dy[dir];
-
-                        matrix[i][j] = dirAnterior + 30;
-                    }
-                    else{
-                        actualizarPosicion();
-                    }
-                    dirAnterior = dir;
-
-                    pausa();
-                }
-
-                System.out.println("Entregado");
-                System.out.println(matrix[i][j]);
-                System.out.println(ocupado);
-
-                imp();
-                //break;
+                recorridoNave();
             }
             
             pausa();
@@ -168,6 +100,108 @@ public class Agente extends Thread{
                       
     }
 
+    private void movAleatorio() {
+        int dir = -1;
+
+        while(matrix[i][j] != 3) {
+            casillaAnterior = tablero[i][j];
+            dir = aleatorio.nextInt(4);  
+            while(!ok(i + dx[dir], j + dy[dir])){
+                dir = aleatorio.nextInt(4);
+            }
+
+            i += dx[dir];
+            j += dy[dir];
+            actualizarPosicion();
+
+            pausa();
+        }
+
+        ocupado ^= 1;
+        swap();
+        actualizarPosicion();
+
+    }
+
+    private void seguirMigas() {
+        int dir = -1;
+        while(matrix[i][j] >= 30 && matrix[i - dx[matrix[i][j] % 10]][j - dy[matrix[i][j] % 10]] >= 30) {
+            casillaAnterior = tablero[i][j];
+
+            dir = matrix[i][j] % 10;
+            i -= dx[dir];
+            j -= dy[dir];
+
+            /* 
+            if(matrix[i][j] == 3) {
+                i += dx[dir];
+                i += dy[dir];
+                break;
+            } 
+            */
+            
+            actualizarPosicion();
+            pausa();
+        }
+
+
+        imp();
+
+        for(int i = 0; i <= 100; i++) {
+            pausa();
+        }
+    }
+
+    private void recorridoNave() {
+        System.out.println("Nave " + i + " " + j);
+        
+        int dirAnterior = -1, dir = -1;
+        if(okMigas(i, j)) {
+            rastro = true;
+            borrar = false;
+        }
+        else{
+            rastro = false;
+            borrar = true;
+        }
+
+        String recorrido = busquedaA();
+        dirAnterior = Character.getNumericValue(recorrido.charAt(0));
+        
+        for(int c = 0; c < recorrido.length(); c++) {
+            casillaAnterior = tablero[i][j];
+            dir = Character.getNumericValue(recorrido.charAt(c));
+
+            if(matrix[i + dx[dir]][j + dy[dir]] != 2) {
+                matrix[i][j] = (dirAnterior + 30);
+            }
+            i += dx[dir];
+            j += dy[dir];
+
+            if(matrix[i][j] == 2){
+                casillaAnterior.setIcon(null);
+                tablero[i][j].setIcon(icon);
+                ocupado ^= 1;
+                swap();
+                casillaAnterior.setIcon(icon);
+                tablero[i][j].setIcon(nave);
+
+                i -= dx[dir];
+                j -= dy[dir];
+
+                matrix[i][j] = dirAnterior + 30;
+            }
+            else{
+                actualizarPosicion();
+            }
+            dirAnterior = dir;
+
+            pausa();
+        }
+
+        imp();
+        
+    }
 
     private String busquedaA() {
 
@@ -247,7 +281,7 @@ public class Agente extends Thread{
     private boolean ok2(int x, int y){
         if(x>=0 && y>=0 && x<matrix.length && y<matrix.length){
             if(matrix[x][y] == 4)  return false;
-            if(matrix[x][y] > 20 && matrix[x][y] <= 23)  return false;
+            if(matrix[x][y] == 3)  return false;
             //if(matrix[x][y]==2)  return 0;
             return true;
         }
@@ -259,6 +293,25 @@ public class Agente extends Thread{
         int y = a.getY() + dy[i];
         
         return ok2(x, y);
+    }
+
+    private boolean okMigas(int x, int y) {
+        if(lim(x + 1, y) && matrix[x + 1][y] == 3) return true;
+        if(lim(x, y + 1) && matrix[x][y + 1] == 3) return true;
+        if(lim(x - 1, y) && matrix[x - 1][y] == 3) return true;
+        if(lim(x, y - 1) && matrix[x][y - 1] == 3) return true;
+        
+        //Diagonales
+        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) return true;
+        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) return true;
+        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) return true;
+        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) return true;
+
+        return false;
+    }
+
+    private boolean lim(int x, int y) {
+        return x >= 0 && y >= 0 && x < matrix.length && y < matrix.length;
     }
 
     //Auxiliar para detener el programa y que sean visibles las animaciones
@@ -284,6 +337,9 @@ public class Agente extends Thread{
 
         if(rastro) {
             casillaAnterior.setIcon(huellas);
+        }
+        if(borrar) {
+            casillaAnterior.setIcon(null);
         }
         //System.out.println(nombre + " in -> Row: " + i + " Col:"+ j);              
     }

@@ -125,11 +125,8 @@ public class Escenario extends JFrame{
         addWindowListener(new MyWindowAdapter());
         
         // Crea 2 agentes
-        wallE = new Agente("Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
-        eva = new Agente("Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
-        matrix[wallE.pos()[0]][wallE.pos()[1]] = 1;
-        matrix[eva.pos()[0]][eva.pos()[1]] = 1;
-        
+        wallE = new Agente(2, 3, "Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
+        eva = new Agente(10, 11, "Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
     }
         
     private void gestionaSalir(ActionEvent eventObject){
@@ -169,7 +166,7 @@ public class Escenario extends JFrame{
         
     }
     
-    //0: vacio, 1:robot, 2:nave, 23:muestra, 4: obstaculo
+    //0: vacio, 1:robot, 2:nave, 3:muestra, 4: obstaculo
     private void gestionaObstacle(ItemEvent eventObject){
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
         if(opt.isSelected()){
@@ -187,7 +184,7 @@ public class Escenario extends JFrame{
         JRadioButtonMenuItem opt = (JRadioButtonMenuItem) eventObject.getSource();
         if(opt.isSelected()){
             actualIcon = sampleIcon;
-            tipo = 23;
+            tipo = 3;
         }
         else{
             actualIcon = null; 
