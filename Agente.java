@@ -51,7 +51,7 @@ public class Agente extends Thread{
         actual = icon;
         this.i = aleatorio.nextInt(matrix.length);
         this.j = aleatorio.nextInt(matrix.length);
-        tablero[i][j].setIcon(actual);     
+        tablero[i][j].setIcon( ( (ocupado == 0) ? icon : icon2 ) );     
     }
 
     public Agente(int x, int y, String nombre, ImageIcon icon, ImageIcon icon2, int[][] matrix, JLabel tablero[][], Set<int[]> naves, ImageIcon nav, ImageIcon muestra, ImageIcon huellas){
@@ -73,7 +73,7 @@ public class Agente extends Thread{
         actual = icon;
         this.i = x;
         this.j = y;
-        tablero[i][j].setIcon(actual);     
+        tablero[i][j].setIcon( ( (ocupado == 0) ? icon : icon2 ) );     
     }
     
     @Override
@@ -140,11 +140,20 @@ public class Agente extends Thread{
             dir = matrix[i][j] % 10;
             i -= dx[dir];
             j -= dy[dir];
+
+            if(matrix[i][j] < 10 ) {
+                rastro = false;
+                return;
+            }
             
             actualizarPosicion();
             pausa();
         }
 
+        if(matrix[i][j] < 10 ) {
+            rastro = false;
+            return;
+        }
         int donde = okMigas1(i, j);
         System.out.println("Esta en " + donde);
         imp();
@@ -176,10 +185,10 @@ public class Agente extends Thread{
 
             if(matrix[i][j] == 2){
                 casillaAnterior.setIcon(null);
-                tablero[i][j].setIcon(actual);
+                tablero[i][j].setIcon( ( (ocupado == 0) ? icon : icon2 ) );
                 ocupado = 0;
                 swap();
-                casillaAnterior.setIcon(actual);
+                casillaAnterior.setIcon( ( (ocupado == 0) ? icon : icon2 ) );
                 tablero[i][j].setIcon(nave);
 
                 i -= dx[dir];
@@ -356,6 +365,7 @@ public class Agente extends Thread{
             return 8;
         }
 
+        ocupado = 0;
         return 0;
     }
 
@@ -421,7 +431,7 @@ public class Agente extends Thread{
     
     public synchronized void actualizarPosicion(){
         casillaAnterior.setIcon(null); // Elimina su figura de la casilla anterior
-        tablero[i][j].setIcon(actual); // Pone su figura en la nueva casilla
+        tablero[i][j].setIcon( ( (ocupado == 0) ? icon : icon2 ) ); // Pone su figura en la nueva casilla
 
         if(rastro) {
             casillaAnterior.setIcon(huellas);
@@ -434,7 +444,7 @@ public class Agente extends Thread{
     
     public synchronized void actualizarPosicionConNave(){
         casillaAnterior.setIcon(null);
-        tablero[i][j].setIcon(actual);
+        tablero[i][j].setIcon( ( (ocupado == 0) ? icon : icon2 ) );
     }
     
 }
