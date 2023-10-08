@@ -13,6 +13,7 @@ public class Agente extends Thread{
     private final String nombre;
     private int i;
     private int j;
+    private ImageIcon actual;
     private ImageIcon icon;
     private ImageIcon icon2;
     private ImageIcon nave;
@@ -47,9 +48,10 @@ public class Agente extends Thread{
         borrar = false;
         rastro = false;
         
+        actual = icon;
         this.i = aleatorio.nextInt(matrix.length);
         this.j = aleatorio.nextInt(matrix.length);
-        tablero[i][j].setIcon(icon);     
+        tablero[i][j].setIcon(actual);     
     }
 
     public Agente(int x, int y, String nombre, ImageIcon icon, ImageIcon icon2, int[][] matrix, JLabel tablero[][], Set<int[]> naves, ImageIcon nav, ImageIcon muestra, ImageIcon huellas){
@@ -68,9 +70,10 @@ public class Agente extends Thread{
         borrar = false;
         rastro = false;
         
+        actual = icon;
         this.i = x;
         this.j = y;
-        tablero[i][j].setIcon(icon);     
+        tablero[i][j].setIcon(actual);     
     }
     
     @Override
@@ -90,7 +93,7 @@ public class Agente extends Thread{
                     movAleatorio();
                 }
 
-                actualizarPosicion();
+                //actualizarPosicion();
             }
             else{
                 recorridoNave();
@@ -119,7 +122,9 @@ public class Agente extends Thread{
             pausa();
         }
 
-        ocupado ^= 1;
+        if(matrix[i][j] == 3) {
+            ocupado = 1;
+        }
         swap();
         actualizarPosicion();
 
@@ -127,8 +132,9 @@ public class Agente extends Thread{
 
     private void seguirMigas() {
         int dir = -1;
+        rastro = true;
         while(matrix[i][j] >= 30 && matrix[i - dx[matrix[i][j] % 10]][j - dy[matrix[i][j] % 10]] >= 30) {
-            matrix[i][j] = (matrix[i][j] < 40 && matrix[i][j] >= 30) ? 0 : matrix[i][j] - 10;
+            //matrix[i][j] = (matrix[i][j] < 40 && matrix[i][j] >= 30) ? 0 : matrix[i][j] - 10;
             casillaAnterior = tablero[i][j];
 
             dir = matrix[i][j] % 10;
@@ -170,10 +176,10 @@ public class Agente extends Thread{
 
             if(matrix[i][j] == 2){
                 casillaAnterior.setIcon(null);
-                tablero[i][j].setIcon(icon);
-                ocupado ^= 1;
+                tablero[i][j].setIcon(actual);
+                ocupado = 0;
                 swap();
-                casillaAnterior.setIcon(icon);
+                casillaAnterior.setIcon(actual);
                 tablero[i][j].setIcon(nave);
 
                 i -= dx[dir];
@@ -205,9 +211,7 @@ public class Agente extends Thread{
             return rutas.get(inicioc);
         }
 
-        int iteraciones = 0;
         while(!pq.isEmpty()) {
-            iteraciones++;
             anterior = actual;
             actual = pq.poll();
 
@@ -289,31 +293,35 @@ public class Agente extends Thread{
     }
 
     private int okMigas1(int x, int y) {
+        if(nombre.equals("Wall-E")) {
+            System.out.println("Hola desde ");
+        }
+
         if(lim(x + 1, y) && matrix[x + 1][y] == 3) {
             tablero[x + 1][y].setIcon(null);
             matrix[x + 1][y] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 1;
         }
         if(lim(x, y + 1) && matrix[x][y + 1] == 3) {
             tablero[x][y + 1].setIcon(null);
             matrix[x][y + 1] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 2;
         }
         if(lim(x - 1, y) && matrix[x - 1][y] == 3) {
             tablero[x - 1][y].setIcon(null);
             matrix[x - 1][y] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 3;
         }
         if(lim(x, y - 1) && matrix[x][y - 1] == 3) {
             tablero[x][y - 1].setIcon(null);
             matrix[x][y - 1] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 4;
         }
@@ -322,28 +330,28 @@ public class Agente extends Thread{
         if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) {
             tablero[x + 1][y + 1].setIcon(null);
             matrix[x + 1][y + 1] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 5;
         }
         if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) {
             tablero[x - 1][y - 1].setIcon(null);
             matrix[x - 1][y - 1] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 6;
         }
         if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) {
             tablero[x - 1][y + 1].setIcon(null);
             matrix[x - 1][y + 1] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 7;
         }
         if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) {
             tablero[x + 1][y - 1].setIcon(null);
             matrix[x + 1][y - 1] = 0;
-            ocupado ^= 1;
+            ocupado = 1;
             swap();
             return 8;
         }
@@ -398,14 +406,22 @@ public class Agente extends Thread{
     
     //Intercambia los iconos si esta ocupado o desocupado
     private void swap(){
+        if(ocupado == 1) {
+            actual = icon;
+        }
+        else{
+            actual = icon2;
+        }
+        /* 
         ImageIcon aux = icon;
         icon = icon2;
         icon2 = aux;
+        */
     }
     
     public synchronized void actualizarPosicion(){
         casillaAnterior.setIcon(null); // Elimina su figura de la casilla anterior
-        tablero[i][j].setIcon(icon); // Pone su figura en la nueva casilla
+        tablero[i][j].setIcon(actual); // Pone su figura en la nueva casilla
 
         if(rastro) {
             casillaAnterior.setIcon(huellas);
@@ -418,7 +434,7 @@ public class Agente extends Thread{
     
     public synchronized void actualizarPosicionConNave(){
         casillaAnterior.setIcon(null);
-        tablero[i][j].setIcon(icon);
+        tablero[i][j].setIcon(actual);
     }
     
 }
