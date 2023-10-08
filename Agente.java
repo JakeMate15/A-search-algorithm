@@ -9,6 +9,7 @@ import javax.swing.JLabel;
  * @author Erik
  */
 public class Agente extends Thread{
+    private HashMap<String, String> rutas;
     private final String nombre;
     private int i;
     private int j;
@@ -23,8 +24,6 @@ public class Agente extends Thread{
     private int naveY;
     private int ocupado;
     private int[] dx= {1,0,-1,0}, dy= {0,1,0,-1};
-    private int[] auxDir = {2, 3, 0, 1};
-    private String dir = "drul";
     private boolean borrar;
     private boolean rastro;
     private ImageIcon huellas;
@@ -42,6 +41,7 @@ public class Agente extends Thread{
         this.nave = nav;
         this.muestra = muestra;
         this.huellas = huellas;
+        rutas = new HashMap<>();
 
         ocupado = 0;
         borrar = false;
@@ -62,7 +62,8 @@ public class Agente extends Thread{
         this.nave = nav;
         this.muestra = muestra;
         this.huellas = huellas;
-
+        rutas = new HashMap<>();
+        
         ocupado = 0;
         borrar = false;
         rastro = false;
@@ -82,6 +83,7 @@ public class Agente extends Thread{
             
             if(ocupado == 0){
                 if(matrix[i][j] >= 30) {
+                    System.out.println(nombre + " en migas");
                     seguirMigas();
                 }
                 else{
@@ -103,7 +105,7 @@ public class Agente extends Thread{
     private void movAleatorio() {
         int dir = -1;
 
-        while(matrix[i][j] != 3) {
+        while(matrix[i][j] != 3 && matrix[i][j] < 30) {
             casillaAnterior = tablero[i][j];
             dir = aleatorio.nextInt(4);  
             while(!ok(i + dx[dir], j + dy[dir])){
@@ -126,37 +128,25 @@ public class Agente extends Thread{
     private void seguirMigas() {
         int dir = -1;
         while(matrix[i][j] >= 30 && matrix[i - dx[matrix[i][j] % 10]][j - dy[matrix[i][j] % 10]] >= 30) {
+            matrix[i][j] = (matrix[i][j] < 40 && matrix[i][j] >= 30) ? 0 : matrix[i][j] - 10;
             casillaAnterior = tablero[i][j];
 
             dir = matrix[i][j] % 10;
             i -= dx[dir];
             j -= dy[dir];
-
-            /* 
-            if(matrix[i][j] == 3) {
-                i += dx[dir];
-                i += dy[dir];
-                break;
-            } 
-            */
             
             actualizarPosicion();
             pausa();
         }
 
-
+        int donde = okMigas1(i, j);
+        System.out.println("Esta en " + donde);
         imp();
-
-        for(int i = 0; i <= 100; i++) {
-            pausa();
-        }
     }
 
     private void recorridoNave() {
-        System.out.println("Nave " + i + " " + j);
-        
         int dirAnterior = -1, dir = -1;
-        if(okMigas(i, j)) {
+        if(okMigas(i, j) > 0) {
             rastro = true;
             borrar = false;
         }
@@ -173,7 +163,7 @@ public class Agente extends Thread{
             dir = Character.getNumericValue(recorrido.charAt(c));
 
             if(matrix[i + dx[dir]][j + dy[dir]] != 2) {
-                matrix[i][j] = (dirAnterior + 30);
+                matrix[i][j] = borrar ? 0 : (dirAnterior + 40);
             }
             i += dx[dir];
             j += dy[dir];
@@ -189,7 +179,7 @@ public class Agente extends Thread{
                 i -= dx[dir];
                 j -= dy[dir];
 
-                matrix[i][j] = dirAnterior + 30;
+                matrix[i][j] = borrar ? 0 : (dirAnterior + 40);
             }
             else{
                 actualizarPosicion();
@@ -204,11 +194,16 @@ public class Agente extends Thread{
     }
 
     private String busquedaA() {
-
+        String inicioc = i + " " + j;
         PriorityQueue<Nodo> pq = new PriorityQueue<>(new NodoComparator());
         Nodo inicio = new Nodo(i, j, 0, "", 0);
         pq.add(inicio);
         Nodo actual = inicio, anterior = inicio;
+
+        System.out.println(inicioc);
+        if(rutas.containsKey(inicioc)) {
+            return rutas.get(inicioc);
+        }
 
         int iteraciones = 0;
         while(!pq.isEmpty()) {
@@ -236,9 +231,7 @@ public class Agente extends Thread{
             }
         }
 
-        //System.out.println(actual.getRecorrido());
-        //System.out.println(iteraciones);
-
+        rutas.put(inicioc, actual.getRecorrido());
         return actual.getRecorrido();
     }
     
@@ -295,19 +288,98 @@ public class Agente extends Thread{
         return ok2(x, y);
     }
 
-    private boolean okMigas(int x, int y) {
-        if(lim(x + 1, y) && matrix[x + 1][y] == 3) return true;
-        if(lim(x, y + 1) && matrix[x][y + 1] == 3) return true;
-        if(lim(x - 1, y) && matrix[x - 1][y] == 3) return true;
-        if(lim(x, y - 1) && matrix[x][y - 1] == 3) return true;
+    private int okMigas1(int x, int y) {
+        if(lim(x + 1, y) && matrix[x + 1][y] == 3) {
+            tablero[x + 1][y].setIcon(null);
+            matrix[x + 1][y] = 0;
+            ocupado ^= 1;
+            swap();
+            return 1;
+        }
+        if(lim(x, y + 1) && matrix[x][y + 1] == 3) {
+            tablero[x][y + 1].setIcon(null);
+            matrix[x][y + 1] = 0;
+            ocupado ^= 1;
+            swap();
+            return 2;
+        }
+        if(lim(x - 1, y) && matrix[x - 1][y] == 3) {
+            tablero[x - 1][y].setIcon(null);
+            matrix[x - 1][y] = 0;
+            ocupado ^= 1;
+            swap();
+            return 3;
+        }
+        if(lim(x, y - 1) && matrix[x][y - 1] == 3) {
+            tablero[x][y - 1].setIcon(null);
+            matrix[x][y - 1] = 0;
+            ocupado ^= 1;
+            swap();
+            return 4;
+        }
         
         //Diagonales
-        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) return true;
-        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) return true;
-        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) return true;
-        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) return true;
+        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) {
+            tablero[x + 1][y + 1].setIcon(null);
+            matrix[x + 1][y + 1] = 0;
+            ocupado ^= 1;
+            swap();
+            return 5;
+        }
+        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) {
+            tablero[x - 1][y - 1].setIcon(null);
+            matrix[x - 1][y - 1] = 0;
+            ocupado ^= 1;
+            swap();
+            return 6;
+        }
+        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) {
+            tablero[x - 1][y + 1].setIcon(null);
+            matrix[x - 1][y + 1] = 0;
+            ocupado ^= 1;
+            swap();
+            return 7;
+        }
+        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) {
+            tablero[x + 1][y - 1].setIcon(null);
+            matrix[x + 1][y - 1] = 0;
+            ocupado ^= 1;
+            swap();
+            return 8;
+        }
 
-        return false;
+        return 0;
+    }
+
+    private int okMigas(int x, int y) {
+        if(lim(x + 1, y) && matrix[x + 1][y] == 3) return 1;
+        if(lim(x, y + 1) && matrix[x][y + 1] == 3) return 2;
+        if(lim(x - 1, y) && matrix[x - 1][y] == 3) return 3;
+        if(lim(x, y - 1) && matrix[x][y - 1] == 3) return 4;
+        
+        //Diagonales
+        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) return 5;
+        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) return 6;
+        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) return 7;
+        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) return 8;
+
+        return 0;
+    }
+
+    private int CMigas(int x, int y) {
+        int res = 0;
+        if(lim(x + 1, y) && matrix[x + 1][y] == 3) res++;
+        if(lim(x, y + 1) && matrix[x][y + 1] == 3) res++;
+        if(lim(x - 1, y) && matrix[x - 1][y] == 3) res++;
+        if(lim(x, y - 1) && matrix[x][y - 1] == 3) res++;
+        
+        //Diagonales
+        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) res++;
+        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) res++;
+        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) res++;
+        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) res++;
+
+        return res;
     }
 
     private boolean lim(int x, int y) {
