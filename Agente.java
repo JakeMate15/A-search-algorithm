@@ -1,8 +1,5 @@
-import java.util.Random;
-import java.awt.Image;
 import java.util.*;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
+import javax.swing.*;
 
 /**
  *
@@ -382,22 +379,6 @@ public class Agente extends Thread{
         if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) return 8;
 
         return 0;
-    }
-
-    private int CMigas(int x, int y) {
-        int res = 0;
-        if(lim(x + 1, y) && matrix[x + 1][y] == 3) res++;
-        if(lim(x, y + 1) && matrix[x][y + 1] == 3) res++;
-        if(lim(x - 1, y) && matrix[x - 1][y] == 3) res++;
-        if(lim(x, y - 1) && matrix[x][y - 1] == 3) res++;
-        
-        //Diagonales
-        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) res++;
-        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) res++;
-        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) res++;
-        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) res++;
-
-        return res;
     }
 
     private boolean lim(int x, int y) {
