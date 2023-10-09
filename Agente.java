@@ -131,7 +131,6 @@ public class Agente extends Thread{
         int dir = -1;
         rastro = true;
         while(matrix[i][j] >= 30 && matrix[i - dx[matrix[i][j] % 10]][j - dy[matrix[i][j] % 10]] >= 30) {
-            //matrix[i][j] = (matrix[i][j] < 40 && matrix[i][j] >= 30) ? 0 : matrix[i][j] - 10;
             casillaAnterior = tablero[i][j];
 
             dir = matrix[i][j] % 10;
@@ -212,7 +211,7 @@ public class Agente extends Thread{
         pq.add(inicio);
         Nodo actual = inicio, anterior = inicio;
 
-        System.out.println(inicioc);
+        //System.out.println(inicioc);
         if(rutas.containsKey(inicioc)) {
             return rutas.get(inicioc);
         }
@@ -243,6 +242,38 @@ public class Agente extends Thread{
 
         rutas.put(inicioc, actual.getRecorrido());
         return actual.getRecorrido();
+    }
+
+    private int okMigas(int x, int y) {
+        if(lim(x + 1, y) && matrix[x + 1][y] == 3) return 1;
+        if(lim(x, y + 1) && matrix[x][y + 1] == 3) return 2;
+        if(lim(x - 1, y) && matrix[x - 1][y] == 3) return 3;
+        if(lim(x, y - 1) && matrix[x][y - 1] == 3) return 4;
+        
+        //Diagonales
+        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) return 5;
+        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) return 6;
+        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) return 7;
+        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) return 8;
+
+        return 0;
+    }
+
+    private boolean ok2(int x, int y){
+        if(x>=0 && y>=0 && x<matrix.length && y<matrix.length){
+            if(matrix[x][y] == 4)  return false;
+            if(matrix[x][y] == 3)  return false;
+            //if(matrix[x][y]==2)  return 0;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean ok3(Nodo a, int i) {
+        int x = a.getX() + dx[i];
+        int y = a.getY() + dy[i];
+        
+        return ok2(x, y);
     }
     
     public int[] pos(){
@@ -279,23 +310,6 @@ public class Agente extends Thread{
             return true;
         }
         return false;
-    }
-    
-    private boolean ok2(int x, int y){
-        if(x>=0 && y>=0 && x<matrix.length && y<matrix.length){
-            if(matrix[x][y] == 4)  return false;
-            if(matrix[x][y] == 3)  return false;
-            //if(matrix[x][y]==2)  return 0;
-            return true;
-        }
-        return false;
-    }
-
-    private boolean ok3(Nodo a, int i) {
-        int x = a.getX() + dx[i];
-        int y = a.getY() + dy[i];
-        
-        return ok2(x, y);
     }
 
     private int okMigas1(int x, int y) {
@@ -366,20 +380,6 @@ public class Agente extends Thread{
         return 0;
     }
 
-    private int okMigas(int x, int y) {
-        if(lim(x + 1, y) && matrix[x + 1][y] == 3) return 1;
-        if(lim(x, y + 1) && matrix[x][y + 1] == 3) return 2;
-        if(lim(x - 1, y) && matrix[x - 1][y] == 3) return 3;
-        if(lim(x, y - 1) && matrix[x][y - 1] == 3) return 4;
-        
-        //Diagonales
-        if(lim(x + 1, y + 1) && matrix[x + 1][y + 1] == 3) return 5;
-        if(lim(x - 1, y - 1) && matrix[x - 1][y - 1] == 3) return 6;
-        if(lim(x - 1, y + 1) && matrix[x - 1][y + 1] == 3) return 7;
-        if(lim(x + 1, y - 1) && matrix[x + 1][y - 1] == 3) return 8;
-
-        return 0;
-    }
 
     private boolean lim(int x, int y) {
         return x >= 0 && y >= 0 && x < matrix.length && y < matrix.length;

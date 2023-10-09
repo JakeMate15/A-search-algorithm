@@ -24,7 +24,6 @@ import java.util.*;
 public class Escenario extends JFrame{
     private JLabel[][] tablero;     
     private int[][] matrix;
-    private int[][] migas;
     private final int dim = 15;
     private HashMap<JLabel,int[]> cords;
     private Set<int[]> naves;
@@ -125,11 +124,11 @@ public class Escenario extends JFrame{
         addWindowListener(new MyWindowAdapter());
         
         // Crea 2 agentes
-        //wallE = new Agente(11, 3, "Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
-        //eva = new Agente(11, 1, "Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
+        wallE = new Agente(11, 3, "Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
+        eva = new Agente(11, 1, "Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
 
-        wallE = new Agente("Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
-        eva = new Agente("Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
+        //wallE = new Agente("Wall-E",robot1, robot1M,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
+        //eva = new Agente("Eva",robot2, robot2M ,matrix, tablero,naves,motherIcon, sampleIcon, huellas); 
     }
         
     private void gestionaSalir(ActionEvent eventObject){
